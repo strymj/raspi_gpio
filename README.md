@@ -4,15 +4,15 @@ ros kinetic
 
 usage
 
-1. clone wiringPi
-$ git clone git://git.drogon.net/wiringPi
-$ cd wiringPi
-$ ./build
+1. clone wiringPi  
+$ git clone git://git.drogon.net/wiringPi  
+$ cd wiringPi  
+$ ./build  
 
 2. write program and catkin_make
 
-3. add authority (to run gpio)
-$ cd my_catkin_ws/devel/lib/raspi_gpio
-$ sudo chown root:rot my_node
-$ sudo chmod a+rw my_node
-$ sudo chmod u+s my_node
+3. add authority (to run gpio)  
+$ cd my_catkin_ws/devel/lib/raspi_gpio  
+$ sudo chown root:rot my_node  
+$ sudo chmod a+rw my_node  
+$ sudo chmod u+s my_node  
