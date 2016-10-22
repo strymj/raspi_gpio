@@ -23,6 +23,6 @@ expect \"sudo\"
 send \"$2\n\"
 "
 
-echo "finish"
+echo "finished"
 
 exit 0;
