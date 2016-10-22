@@ -13,6 +13,6 @@ $ ./build
 
 3. add authority (to run gpio)  
 $ cd my_catkin_ws/devel/lib/raspi_gpio  
-$ sudo chown root:rot my_node  
+$ sudo chown root:root my_node  
 $ sudo chmod a+rw my_node  
 $ sudo chmod u+s my_node  
