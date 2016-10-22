@@ -11,8 +11,10 @@ int main(int argc, char** argv)
 	ros::NodeHandle node_;
 	ros::Rate looprate(10);
 
-	if(wiringPiSetupGpio() == -1) return -1;
-	else cout<<"wiringPi initialize done"<<endl;
+	if(wiringPiSetupGpio() == -1) {
+		cout<<"cannot setup gpio."<<endl;
+		return -1;
+	}
 	pinMode(GPIO18, OUTPUT);
 
 	int loopcount = 0;

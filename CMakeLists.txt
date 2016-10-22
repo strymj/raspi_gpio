@@ -190,3 +190,6 @@ include_directories(
 # catkin_add_nosetests(test)
 add_executable(LEDflash_gpio18 src/LEDflash_gpio18.cpp)
 target_link_libraries(LEDflash_gpio18 ${catkin_LIBRARIES} ${WIRINGPI_LIBRARY})
+
+add_executable(PWM_gpio18 src/PWM_gpio18.cpp)
+target_link_libraries(PWM_gpio18 ${catkin_LIBRARIES} ${WIRINGPI_LIBRARY})

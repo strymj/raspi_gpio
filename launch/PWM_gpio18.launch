@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+
+<launch>
+
+  <node name="PWM" pkg="raspi_gpio" type="PWM_gpio18" output="screen" />
+
+</launch>
