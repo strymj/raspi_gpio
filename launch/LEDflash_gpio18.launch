@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+
+<launch>
+
+  <node name="LEDflash" pkg="raspi_gpio" type="LEDflash_gpio18" output="screen" />
+
+</launch>
