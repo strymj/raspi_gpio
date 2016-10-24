@@ -2,7 +2,7 @@
 #include <iostream>
 #include "wiringPi.h"
 #define GPIO18 18
-#define FLASHRATE 3
+#define FLASHRATE 1
 using namespace std;
 
 int main(int argc, char** argv)

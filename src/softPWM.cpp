@@ -2,8 +2,10 @@
 #include <iostream>
 #include <cmath>
 #include "wiringPi.h"
+#include "softPwm.h"
+#define GPIO17 17
 #define GPIO18 18
-#define RANGE 1024
+#define RANGE 512
 using namespace std;
 
 int main(int argc, char** argv)
@@ -16,21 +18,28 @@ int main(int argc, char** argv)
 		cout<<"cannot setup gpio."<<endl;
 		return -1;
 	}
-	pwmSetMode(PWM_MODE_MS);
-	pwmSetClock(200);
-	pwmSetRange(RANGE);
-	pinMode(GPIO18, PWM_OUTPUT);
+
+	softPwmCreate(GPIO17, 0, RANGE);
+	softPwmCreate(GPIO18, 0, RANGE);
 
 	int loopcount = 0;
 	while(ros::ok())
 	{
-		double nowPWM = (sin(M_PI/40*loopcount)+1) * RANGE/2;
-		pwmWrite(GPIO18, nowPWM);
+		double nowPWM = sin(M_PI/40*loopcount) * RANGE;
+		if(nowPWM >= 0) {
+			softPwmWrite(GPIO17, 0);
+			softPwmWrite(GPIO18, nowPWM);
+		} else {
+			softPwmWrite(GPIO17, -nowPWM);
+			softPwmWrite(GPIO18, 0);
+
+		}
 
 		loopcount++;
 		looprate.sleep();
 	}
-	pwmWrite(GPIO18,0);
+	softPwmWrite(GPIO17,0);
+	softPwmWrite(GPIO18,0);
 
 	return 0;
 }

@@ -188,8 +188,11 @@ include_directories(
 
 ## Add folders to be run by python nosetests
 # catkin_add_nosetests(test)
-add_executable(LEDflash_gpio18 src/LEDflash_gpio18.cpp)
-target_link_libraries(LEDflash_gpio18 ${catkin_LIBRARIES} ${WIRINGPI_LIBRARY})
+add_executable(LED_gpio18 src/LED_gpio18.cpp)
+target_link_libraries(LED_gpio18 ${catkin_LIBRARIES} ${WIRINGPI_LIBRARY})
 
 add_executable(PWM_gpio18 src/PWM_gpio18.cpp)
 target_link_libraries(PWM_gpio18 ${catkin_LIBRARIES} ${WIRINGPI_LIBRARY})
+
+add_executable(softPWM src/softPWM.cpp)
+target_link_libraries(softPWM ${catkin_LIBRARIES} ${WIRINGPI_LIBRARY})
