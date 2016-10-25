@@ -199,3 +199,6 @@ target_link_libraries(softPWM ${catkin_LIBRARIES} ${WIRINGPI_LIBRARY})
 
 add_executable(sub_LED src/sub_LED.cpp)
 target_link_libraries(sub_LED ${catkin_LIBRARIES} ${WIRINGPI_LIBRARY})
+
+add_executable(omni_servo src/omni_servo.cpp)
+target_link_libraries(omni_servo ${catkin_LIBRARIES} ${WIRINGPI_LIBRARY})
