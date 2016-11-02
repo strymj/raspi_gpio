@@ -15,6 +15,7 @@ using namespace std;
 
 double wrad[3] = {0, M_PI*2/3, M_PI*4/3};
 double movecmd[3] = {0,0,0};
+double motorout[3] = {0,0,0};
 bool subscribed = false;
 bool LED = false;
 
@@ -23,7 +24,7 @@ void movecmdCallback(const std_msgs::Float32MultiArray &msg)
 	movecmd[0] = msg.data[0];
 	movecmd[1] = msg.data[1];
 	movecmd[2] = msg.data[2];
-	cout<<"subscribed  data : "<<msg.data[0]<<","<<msg.data[1]<<","<<msg.data[2]<<endl;
+	cout<<"subscribed  data : "<<msg.data[0]<<", "<<msg.data[1]<<", "<<msg.data[2]<<endl;
 	subscribed = true;
 	LED = !LED;
 }
@@ -89,8 +90,6 @@ int main(int argc, char** argv)
 	softPwmCreate(MOTOR2B, 0, RANGE);
 	softPwmCreate(MOTOR3A, 0, RANGE);
 	softPwmCreate(MOTOR3B, 0, RANGE);
-
-	double motorout[3];
 
 	while(ros::ok())
 	{
