@@ -194,8 +194,8 @@ target_link_libraries(LED_gpio18 ${catkin_LIBRARIES} ${WIRINGPI_LIBRARY})
 add_executable(PWM_gpio18 src/PWM_gpio18.cpp)
 target_link_libraries(PWM_gpio18 ${catkin_LIBRARIES} ${WIRINGPI_LIBRARY})
 
-add_executable(softPWM src/softPWM.cpp)
-target_link_libraries(softPWM ${catkin_LIBRARIES} ${WIRINGPI_LIBRARY})
+add_executable(softPWM_gpio1718 src/softPWM_gpio1718.cpp)
+target_link_libraries(softPWM_gpio1718 ${catkin_LIBRARIES} ${WIRINGPI_LIBRARY})
 
 add_executable(sub_LED src/sub_LED.cpp)
 target_link_libraries(sub_LED ${catkin_LIBRARIES} ${WIRINGPI_LIBRARY})
