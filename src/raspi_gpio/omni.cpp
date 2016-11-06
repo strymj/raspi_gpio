@@ -129,16 +129,20 @@ void calc_targetpulse(int* targetpulse, double* movecmd, double* ratio)
 	}
 }
 
-void calc_motorout(double* motorout, int* pulse, int* targetpulse, double* gain)
+void calc_motorout(double* motorout, int* pulse, int* target, double* gain)
 {
-	static int pastpulse[3] = {0,0,0};
-	static int distpulse[3] = {0,0,0};
+	static int Past[3] = {0,0,0};
+	static int Diff[3] = {0,0,0};
+	static int PastDiff[3] = {0,0,0};
+	static int Dist[3] = {0,0,0};
 	for(int i=0; i<NOW; i++) {
-		distpulse[i] += pulse[i] - targetpulse[i];
+		Diff[i] = pulse[i] - target[i];
+		Dist[i] += Diff[i];
 		motorout[i] =
-			- gain[0] * (pulse[i]-targetpulse[i])
-			- gain[1] * distpulse[i];
-		- gain[2] * (pulse[i] - pastpulse[i]);
+			- gain[0] * (pulse[i]-target[i])
+			- gain[1] * Dist[i]
+			- gain[2] * (Diff[i] - PastDiff[i]);
+		PastDiff[i] = Diff[i]; 
 		if(motorout[i]>1) motorout[i] = 1;
 		else if(motorout[i]<-1) motorout[i] = -1;
 	}

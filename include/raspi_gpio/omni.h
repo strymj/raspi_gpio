@@ -31,8 +31,8 @@ double movecmd[3] = {0,0,0};
 int pulse[3] = {0,0,0};
 int targetpulse[3] = {0,0,0};
 double motorout[3] = {0,0,0};
-double gain[3] = {0.02, 0.002, 0};   // p, i, d gain
-double ratio[2] = {0.7, 0.3};    // ratio move : rotate
+double gain[3] = {0.01, 0.002, 0.015};   // p, i, d gain
+double ratio[2] = {0.6, 0.4};    // ratio move : rotate
 
 int GpioInit(void);
 void PwmCreateSetup(void);
