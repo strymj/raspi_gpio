@@ -1,6 +1,18 @@
 #include <raspi_gpio/omni.h>
 using namespace std;
 
+int GpioInit(void)
+{
+	if(wiringPiSetupGpio() == -1) {
+		cout<<"cannot setup gpio."<<endl;
+		return 0;
+	}
+	else {
+		cout<<"gpio init success!"<<endl;
+	}
+	return 1;
+}
+
 void PwmCreateSetup(void)
 {
 	softPwmCreate(MOTOR1A, 0, RANGE);
@@ -103,20 +115,30 @@ void pin3B_changed(void)
 	}
 }
 
-void calc_targetpulse(int* targetpulse, double* movecmd)
+void calc_targetpulse(int* targetpulse, double* movecmd, double* ratio)
 {
+	double norm = sqrt(movecmd[0]*movecmd[0] + movecmd[1]*movecmd[1]);
+	if(norm>1) {
+		movecmd[0] /= norm;
+		movecmd[1] /= norm;
+	}
 	for(int i=0; i<NOW; i++) {
-		targetpulse[i] = MOT2PUL * (movecmd[0]*cos(wrad[i]) + movecmd[1]*sin(wrad[i]) - movecmd[2]);
-		//motorout[i] = motorout[i]/3;
-		//cout<<"motorout["<<i<<"] = "<<motorout[i]<<endl;
+		double pulseMove = ratio[0] * (movecmd[0]*cos(wrad[i]) + movecmd[1]*sin(wrad[i]));
+		double pulseRotate = -ratio[1] * movecmd[2];
+		targetpulse[i] = MAXPULSE * (pulseMove + pulseRotate);
 	}
 }
 
-void calc_motorout(double* motorout, int* pulse, int* targetpulse)
+void calc_motorout(double* motorout, int* pulse, int* targetpulse, double* gain)
 {
-	double pgain = 1.0/30;
+	static int pastpulse[3] = {0,0,0};
+	static int distpulse[3] = {0,0,0};
 	for(int i=0; i<NOW; i++) {
-		motorout[i] = pgain * (targetpulse[i]-pulse[i]);
+		distpulse[i] += pulse[i] - targetpulse[i];
+		motorout[i] =
+			- gain[0] * (pulse[i]-targetpulse[i])
+			- gain[1] * distpulse[i];
+		- gain[2] * (pulse[i] - pastpulse[i]);
 		if(motorout[i]>1) motorout[i] = 1;
 		else if(motorout[i]<-1) motorout[i] = -1;
 	}
@@ -124,33 +146,36 @@ void calc_motorout(double* motorout, int* pulse, int* targetpulse)
 
 void PWMwrite(double* motorout)
 {
-	motorout[0] = motorout[0] * RANGE;
-	motorout[1] = motorout[1] * RANGE;
-	motorout[2] = motorout[2] * RANGE;
-
 	if(motorout[0]>=0) {
-		softPwmWrite(MOTOR1A, motorout[0]);
+		softPwmWrite(MOTOR1A, motorout[0] * RANGE);
 		softPwmWrite(MOTOR1B, 0);
 	} else {
 		softPwmWrite(MOTOR1A, 0);
-		softPwmWrite(MOTOR1B, -motorout[0]);
+		softPwmWrite(MOTOR1B, -motorout[0] * RANGE);
 	}
 
 	if(motorout[1]>=0) {
-		softPwmWrite(MOTOR2A, motorout[1]);
+		softPwmWrite(MOTOR2A, motorout[1] * RANGE);
 		softPwmWrite(MOTOR2B, 0);
 	} else {
 		softPwmWrite(MOTOR2A, 0);
-		softPwmWrite(MOTOR2B, -motorout[1]);
+		softPwmWrite(MOTOR2B, -motorout[1] * RANGE);
 	}
 
 	if(motorout[2]>=0) {
-		softPwmWrite(MOTOR3A, motorout[2]);
+		softPwmWrite(MOTOR3A, motorout[2] * RANGE);
 		softPwmWrite(MOTOR3B, 0);
 	} else {
 		softPwmWrite(MOTOR3A, 0);
-		softPwmWrite(MOTOR3B, -motorout[2]);
+		softPwmWrite(MOTOR3B, -motorout[2] * RANGE);
 	}
+}
+
+void pulseReset(int* pulse)
+{
+	pulse[0] = 0;
+	pulse[1] = 0;
+	pulse[2] = 0;
 }
 
 void dispstatus(double* m_cmd, int* pulse, int* t_pul, double* motor)

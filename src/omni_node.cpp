@@ -1,9 +1,6 @@
 #include <ros/ros.h>
 #include <std_msgs/Float32MultiArray.h>
 #include <raspi_gpio/omni.h>
-using namespace std;
-
-double movecmd[3] = {0,0,0};
 
 void movecmdCallback(const std_msgs::Float32MultiArray& msg)
 {
@@ -15,34 +12,22 @@ void movecmdCallback(const std_msgs::Float32MultiArray& msg)
 int main(int argc, char** argv)
 {
 	ros::init(argc, argv, "omni_node");
-	ros::NodeHandle node_;
+	ros::NodeHandle node_("~");
 	ros::Subscriber sub = node_.subscribe("/keyjoy/movecmd", 1, movecmdCallback);
-	int looprate_;
-	node_.param("looprate", looprate_, 30);
-	ros::Rate looprate(looprate_);
+	ros::Rate looprate(30);
 
-	if(wiringPiSetupGpio() == -1) {
-		cout<<"cannot setup gpio."<<endl;
-		return -1;
-	}
-	else cout<<"setup gpio success!"<<endl;
-
+	if(!GpioInit()) return -1;
 	PwmCreateSetup();
 	pinModeInputSetup();
 	wiringPiISRSetup();
 
-	int targetpulse[3] = {0,0,0};
-	double motorout[3] = {0,0,0};
-
 	while(ros::ok())
 	{
-		calc_targetpulse(targetpulse, movecmd);
-		calc_motorout(motorout, pulse, targetpulse);
+		calc_targetpulse(targetpulse, movecmd, ratio);
+		calc_motorout(motorout, pulse, targetpulse, gain);
 		dispstatus(movecmd, pulse, targetpulse, motorout);
 		PWMwrite(motorout);
-		pulse[0] = 0;
-		pulse[1] = 0;
-		pulse[2] = 0;
+		pulseReset(pulse);
 		ros::spinOnce();
 		looprate.sleep();
 	}
