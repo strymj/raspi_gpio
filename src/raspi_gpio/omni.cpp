@@ -115,6 +115,16 @@ void pin3B_changed(void)
 	}
 }
 
+void emergency_stop(double* movecmd, double pasttime, double emstop_time)
+{
+	cout<<"pasttime = "<<pasttime<<endl;
+	if(pasttime > emstop_time) {
+		movecmd[0] = 0;
+		movecmd[1] = 0;
+		movecmd[2] = 0;
+	}
+}
+
 void calc_targetpulse(int* targetpulse, double* movecmd, double* ratio)
 {
 	double norm = sqrt(movecmd[0]*movecmd[0] + movecmd[1]*movecmd[1]);

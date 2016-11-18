@@ -46,6 +46,7 @@ void pin2B_changed(void);
 void pin3A_changed(void);
 void pin3B_changed(void);
 
+void emergency_stop(double*, double, double);
 void calc_targetpulse(int*, double*, double*);
 void calc_motorout(double*, int*, int*, double*);
 void PWMwrite(double*);
