@@ -34,8 +34,8 @@ int main(int argc, char** argv)
 
 	while(ros::ok())
 	{
-		emergency_stop(movecmd, (double)submiss_count/looprate_, emstop_time_);
 		calc_targetpulse(targetpulse, movecmd, ratio);
+		emergency_stop(targetpulse, (double)submiss_count/looprate_, emstop_time_);
 		calc_motorout(motorout, pulse, targetpulse, gain);
 		dispstatus(movecmd, pulse, targetpulse, motorout);
 		PWMwrite(motorout);

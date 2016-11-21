@@ -31,7 +31,7 @@ double movecmd[3] = {0,0,0};
 int pulse[3] = {0,0,0};
 int targetpulse[3] = {0,0,0};
 double motorout[3] = {0,0,0};
-double gain[3] = {0.01, 0.002, 0.015};   // p, i, d gain
+double gain[3] = {0.008, 0.001, 0.010};   // p, i, d gain
 double ratio[2] = {0.6, 0.4};    // ratio move : rotate
 
 int GpioInit(void);
@@ -46,8 +46,8 @@ void pin2B_changed(void);
 void pin3A_changed(void);
 void pin3B_changed(void);
 
-void emergency_stop(double*, double, double);
 void calc_targetpulse(int*, double*, double*);
+void emergency_stop(int*, double, double);
 void calc_motorout(double*, int*, int*, double*);
 void PWMwrite(double*);
 void pulseReset(int*);
