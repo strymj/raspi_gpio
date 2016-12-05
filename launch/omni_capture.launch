@@ -4,7 +4,6 @@
 
   <node name="omni_node" pkg="raspi_gpio" type="omni_node" output="screen" >
 	  <param name="cmd_topic" value="/position_correction/movecmd" />
-	  <param name="flag_topic" value="/picture_joystick/MarkerFlag" />
 	  <!--
 	  <param name="cmd_topic" value="/keyjoy/movecmd" />
 	  -->

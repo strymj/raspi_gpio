@@ -1,11 +1,9 @@
 #include <ros/ros.h>
-#include <std_msgs/Bool.h>
 #include <std_msgs/Float32MultiArray.h>
 #include <raspi_gpio/omni.h>
 #include <string>
 
 bool movecmdflag = false;
-bool markerflag = false;
 
 void movecmdCallback(const std_msgs::Float32MultiArray& msg)
 {
@@ -15,11 +13,6 @@ void movecmdCallback(const std_msgs::Float32MultiArray& msg)
 	movecmdflag = true;
 }
 
-void markerflagCallback(const std_msgs::Bool& msg)
-{
-	markerflag = msg.data;
-}
-
 int main(int argc, char** argv)
 {
 	ros::init(argc, argv, "omni_node");
@@ -27,13 +20,11 @@ int main(int argc, char** argv)
 
 	int looprate_;
 	double emstop_time_;
-	std::string cmd_topic_, flag_topic_;
+	std::string cmd_topic_;
 	node_.param("looprate", looprate_, 30);
 	node_.param("emstop_time", emstop_time_, 0.5);
 	node_.param("cmd_topic", cmd_topic_,std::string("/position_correction/movecmd"));
-	node_.param("flag_topic", flag_topic_,std::string("/picture_joystick/MarkerFlag"));
 	ros::Subscriber MovecmdSub = node_.subscribe(cmd_topic_, 1, movecmdCallback);
-	ros::Subscriber MarkerFlagSub = node_.subscribe(flag_topic_, 1, markerflagCallback);
 	ros::Rate looprate(looprate_);
 
 	if(!GpioInit()) return -1;
@@ -43,7 +34,7 @@ int main(int argc, char** argv)
 
 	while(ros::ok())
 	{
-		if(movecmdflag && markerflag) { 
+		if(movecmdflag) { 
 			calc_targetpulse(targetpulse, movecmd, ratio);
 			calc_motorout(motorout, pulse, targetpulse, gain);
 		}
