@@ -45,7 +45,6 @@ int main(int argc, char** argv)
 		dispstatus(movecmd, pulse, targetpulse, motorout);
 		pulseReset(pulse);
 		movecmdflag = false;
-		markerflag = false;
 		ros::spinOnce();
 		looprate.sleep();
 	}
