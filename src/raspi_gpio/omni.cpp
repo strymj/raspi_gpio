@@ -115,14 +115,11 @@ void pin3B_changed(void)
 	}
 }
 
-void emergency_stop(int* targetpulse, double pasttime, double emstop_time)
+void stop(double* motorout)
 {
-	cout<<"pasttime = "<<pasttime<<endl;
-	if(pasttime > emstop_time) {
-		targetpulse[0] = 0;
-		targetpulse[1] = 0;
-		targetpulse[2] = 0;
-	}
+	motorout[0] = 0.0;
+	motorout[1] = 0.0;
+	motorout[2] = 0.0;
 }
 
 void calc_targetpulse(int* targetpulse, double* movecmd, double* ratio)
@@ -185,13 +182,6 @@ void PWMwrite(double* motorout)
 	}
 }
 
-void pulseReset(int* pulse)
-{
-	pulse[0] = 0;
-	pulse[1] = 0;
-	pulse[2] = 0;
-}
-
 void dispstatus(double* m_cmd, int* pulse, int* t_pul, double* motor)
 {
 	cout<<"m_cmd = "<<m_cmd[0]<<", "<<m_cmd[1]<<", "<<m_cmd[2]<<endl;
@@ -199,5 +189,12 @@ void dispstatus(double* m_cmd, int* pulse, int* t_pul, double* motor)
 	cout<<"t_pul = "<<t_pul[0]<<", "<<t_pul[1]<<", "<<t_pul[2]<<endl;
 	cout<<"motor = "<<motor[0]<<", "<<motor[1]<<", "<<motor[2]<<endl;
 	cout<<endl;
+}
+
+void pulseReset(int* pulse)
+{
+	pulse[0] = 0;
+	pulse[1] = 0;
+	pulse[2] = 0;
 }
 
