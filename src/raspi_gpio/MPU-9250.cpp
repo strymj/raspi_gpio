@@ -60,7 +60,7 @@ namespace acgy {
 			cout<<"usage : accelrange = {2,4,8,16}"<<endl;
 		}
 
-		wiringPiI2CWriteReg8(fd, ACONF, data);
+		wiringPiI2CWriteReg8(fd, 0x1c, data);
 	}
 
 	int GYRANGE = 250;
@@ -89,7 +89,7 @@ namespace acgy {
 			cout<<"usage : gyrorange = {250,500,1000,2000}"<<endl;
 		}
 
-		wiringPiI2CWriteReg8(fd, GCONF, data);
+		wiringPiI2CWriteReg8(fd, 0x1b, data);
 	}
 
 	int S2U(int num)
