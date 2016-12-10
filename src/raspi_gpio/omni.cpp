@@ -1,16 +1,15 @@
 #include <raspi_gpio/omni.h>
 using namespace std;
 
-int GpioInit(void)
+void GpioInit(void)
 {
 	if(wiringPiSetupGpio() == -1) {
 		cout<<"cannot setup gpio."<<endl;
-		return 0;
+		exit(0);
 	}
 	else {
 		cout<<"gpio init success!"<<endl;
 	}
-	return 1;
 }
 
 void PwmCreateSetup(void)

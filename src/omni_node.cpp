@@ -27,7 +27,7 @@ int main(int argc, char** argv)
 	ros::Subscriber MovecmdSub = node_.subscribe(cmd_topic_, 1, movecmdCallback);
 	ros::Rate looprate(looprate_);
 
-	if(!GpioInit()) return -1;
+	GpioInit();
 	PwmCreateSetup();
 	pinModeInputSetup();
 	wiringPiISRSetup();
