@@ -25,28 +25,42 @@ add_library(omni
 	src/${PROJECT_NAME}/omni.cpp
 	)
 
-add_executable(LED_gpio18
-	src/LED_gpio18.cpp
+add_library(MPU-9250
+	src/${PROJECT_NAME}/MPU-9250.cpp
 	)
-add_executable(softPWM_gpio1718
-	src/softPWM_gpio1718.cpp
-	)
-add_executable(sub_LED
-	src/sub_LED.cpp
+
+#add_executable(LED_gpio18
+#	src/LED_gpio18.cpp
+#	)
+#add_executable(softPWM_gpio1718
+#	src/softPWM_gpio1718.cpp
+#	)
+#add_executable(sub_LED
+#	src/sub_LED.cpp
+#	)
+
+add_executable(MPU-9250_input
+	src/MPU-9250_input.cpp
 	)
 add_executable(omni_node
 	src/omni_node.cpp
 	)
 
-target_link_libraries(LED_gpio18
-	${catkin_LIBRARIES}
-	${WIRINGPI_LIBRARY}
-	)
-target_link_libraries(softPWM_gpio1718
-	${catkin_LIBRARIES}
-	${WIRINGPI_LIBRARY}
-	)
-target_link_libraries(sub_LED
+#target_link_libraries(LED_gpio18
+#	${catkin_LIBRARIES}
+#	${WIRINGPI_LIBRARY}
+#	)
+#target_link_libraries(softPWM_gpio1718
+#	${catkin_LIBRARIES}
+#	${WIRINGPI_LIBRARY}
+#	)
+#target_link_libraries(sub_LED
+#	${catkin_LIBRARIES}
+#	${WIRINGPI_LIBRARY}
+#	)
+
+target_link_libraries(MPU-9250_input
+	MPU-9250
 	${catkin_LIBRARIES}
 	${WIRINGPI_LIBRARY}
 	)

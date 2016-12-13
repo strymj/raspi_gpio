@@ -2,6 +2,7 @@
 #define OMNI_H_
 
 #include <iostream>
+#include <cstdlib>
 #include <cmath>
 #include <wiringPi.h>
 #include <softPwm.h>
@@ -34,7 +35,7 @@ double motorout[3] = {0,0,0};
 double gain[3] = {0.008, 0.001, 0.010};   // p, i, d gain
 double ratio[2] = {0.6, 0.4};    // ratio move : rotate
 
-int GpioInit(void);
+void GpioInit(void);
 void PwmCreateSetup(void);
 void wiringPiISRSetup(void);
 void pinModeInputSetup(void);

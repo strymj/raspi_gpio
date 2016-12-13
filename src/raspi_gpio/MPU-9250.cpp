@@ -1,17 +1,7 @@
 #include <raspi_gpio/MPU-9250.h>
 using namespace std;
 
-namespace acgy {
-
-	static int MAG_MODE_POWERDOWN = 0x00;
-	static int MAG_MODE_SINGLE    = 0x01;
-	static int MAG_MODE_8HZ       = 0x02;
-	static int MAG_MODE_100HZ     = 0x06;
-	static int MAG_MODE_TRIGER    = 0x04;
-	static int MAG_MODE_SELFTEST  = 0x08;
-	
-	static int MAG_MODE_REG14     = 0x00;
-	static int MAG_MODE_REG16     = 0x10;
+namespace mpu9250 {
 
 	int I2CInit(int ID)
 	{
@@ -26,12 +16,19 @@ namespace acgy {
 		return fd;
 	}
 
-	void StartSensing(void)
+	bool acgystart = false;
+	void StartSensing(int fd)
 	{
-		wiringPiI2CWrite(0x6B, 0x00);
-		wiringPiI2CWrite(0x37, 0x02);   // accessible magnetic sensor
-		wiringPiI2CWrite(0x0A, MAG_MODE_REG16 | MAG_MODE_POWERDOWN);
-		cout<<"sensing start."<<endl;
+		wiringPiI2CWriteReg8(fd, 0x6B, 0x00);
+		wiringPiI2CWriteReg8(fd ,0x37, 0x02); 
+		acgystart = true;
+		cout<<"Accel and Gyro sensor start."<<endl;
+	}
+
+	int magmode = -1;
+	void MagModeSet(int fd, int mode)
+	{
+		wiringPiI2CWriteReg8(fd, 0x0A, mode);
 	}
 
 	int ACRANGE = 2;
@@ -140,11 +137,16 @@ namespace acgy {
 
 	axisData getMag(int fd)
 	{
-		//while(!(wiringPiI2CReadReg8(fd, 0x02) & 0x01)) {   // !dataready
-		//	cout<<wiringPiI2CReadReg8(fd, 0x02)<<endl;
-		//		usleep(10000);
-		//}
-		wiringPiI2CWrite(0x0A, MAG_MODE_REG16 | MAG_MODE_SINGLE);
+		if(magmode == -1 || magmode == MAG_MODE_SINGLE) {
+			wiringPiI2CWriteReg8(fd, 0x0a, MAG_MODE_SINGLE);
+		}
+
+		while(!(wiringPiI2CReadReg8(fd, 0x02) & 0x01)) {   // !dataready
+			wiringPiI2CReadReg8(fd, 0x02);
+			//cout<<"dataready : "<<wiringPiI2CReadReg8(fd, 0x02)<<endl;
+			usleep(100);
+		}
+
 
 		int XL = wiringPiI2CReadReg8(fd, 0x03);
 		int XH = wiringPiI2CReadReg8(fd, 0x04);
@@ -152,10 +154,9 @@ namespace acgy {
 		int YH = wiringPiI2CReadReg8(fd, 0x06);
 		int ZL = wiringPiI2CReadReg8(fd, 0x07);
 		int ZH = wiringPiI2CReadReg8(fd, 0x08);
-		int overflow = wiringPiI2CReadReg8(fd,0x09);
-		wiringPiI2CReadReg8(fd,0x09);
-		wiringPiI2CReadReg8(fd,0x09);
-		wiringPiI2CReadReg8(fd,0x09);
+		
+		bool ofl = wiringPiI2CReadReg8(fd, 0x09)>>3 & 0x01;
+		cout<<"oflow  : "<<ofl<<endl;
 
 		axisData ans;
 		ans.x = S2U(XH << 8 | XL);
@@ -169,10 +170,11 @@ namespace acgy {
 	{
 		axisData offset = {0.0, 0.0, 0.0};
 		for(int i=0; i<count; i++) {
-		   axisData read = getAccel(fd);
-		   offset.x += read.x;
-		   offset.y += read.y;
-		   offset.z += read.z;
+			axisData read = getAccel(fd);
+			offset.x += read.x;
+			offset.y += read.y;
+			offset.z += read.z;
+			usleep(10000);
 		}
 		offset.x /= count;
 		offset.y /= count;
@@ -184,10 +186,11 @@ namespace acgy {
 	{
 		axisData offset = {0.0, 0.0, 0.0};
 		for(int i=0; i<count; i++) {
-		   axisData read = getGyro(fd);
-		   offset.x += read.x;
-		   offset.y += read.y;
-		   offset.z += read.z;
+			axisData read = getGyro(fd);
+			offset.x += read.x;
+			offset.y += read.y;
+			offset.z += read.z;
+			usleep(10000);
 		}
 		offset.x /= count;
 		offset.y /= count;
