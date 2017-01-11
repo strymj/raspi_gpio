@@ -11,17 +11,18 @@
 #define NOW 3       // Number Of Wheels
 
 // GPIO pin define
-#define MOTOR1A 4
-#define MOTOR1B 3
+#define MOTOR1A 25
+#define MOTOR1B 8
 #define MOTOR2A 23
 #define MOTOR2B 24
-#define MOTOR3A 11
-#define MOTOR3B 9
+#define MOTOR3A 17
+#define MOTOR3B 27
 
-#define SIG1A 12
-#define SIG1B 6
-#define SIG2A 26
-#define SIG2B 19
+// OMRON E6A2-CW3C ENCODER INPUT
+#define SIG1A 6   // OUT B
+#define SIG1B 13    // OUT A
+#define SIG2A 19
+#define SIG2B 26
 #define SIG3A 20
 #define SIG3B 21
 
