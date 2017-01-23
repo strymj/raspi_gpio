@@ -40,6 +40,9 @@ void markerposeCallback(const geometry_msgs::PoseStamped& msg)
 	pose[0] = msg.pose.position.x;
 	pose[1] = msg.pose.position.y;
 	pose[2] = yaw;
+	//cout<<"pose_x : "<<pose[0]<<endl;
+	//cout<<"pose_y : "<<pose[1]<<endl;
+	//cout<<"pose_t : "<<pose[2]<<endl;
 	poseflag = true;
 }
 
@@ -63,15 +66,19 @@ void sensorCallback(const std_msgs::Float32MultiArray& msg)
 
 void movecmd_detect(double* movecmd, double* sensorvalue)
 {
-	//static double accelgain = 0.5;
-	//static double gyrogain = 0.004;
-	static double accelgain = 1.2;
-	//movecmd[0] += -accelgain * sensorvalue[0];
-	//movecmd[1] += -accelgain * sensorvalue[1];
-	//movecmd[2] +=  -gyrogain * sensorvalue[5];
-	movecmd[0] = accelgain * sensorvalue[0];
-	movecmd[1] = accelgain * sensorvalue[1];
-	movecmd[2] = 0;
+	//static double accelgain = 1.2;
+	//movecmd[0] = accelgain * sensorvalue[0];
+	//movecmd[1] = accelgain * sensorvalue[1];
+	static double accelgain = 1.0;
+	double sensor_x = sensorvalue[0];
+	if (1.0 < sensor_x) sensor_x = 1.0;
+	if (sensor_x <-1.0) sensor_x =-1.0;
+	double sensor_y = sensorvalue[1];
+	if (1.0 < sensor_y) sensor_y = 1.0;
+	if (sensor_y <-1.0) sensor_y =-1.0;
+	movecmd[0] = accelgain * -(acos(sensor_x)-M_PI/2);
+	movecmd[1] = accelgain * -(acos(sensor_y)-M_PI/2);
+	movecmd[2] = 0.0;
 }
 
 void movecmd_correction(double* movecmd, double* pose)
@@ -90,10 +97,10 @@ void movecmd_correction(double* movecmd, double* pose)
 	//double error_y = transform.getOrigin().y();
 	//double error_t = yaw;
 
+	double mvcmdvecnorm = sqrt(movecmd[0]*movecmd[0] + movecmd[1]*movecmd[1]);
 	double error_x = pose[0];
 	double error_y = pose[1];
 	double error_t = pose[2];
-	cout<<"error_t : "<<error_t<<endl;
 
 	double theta = atan2(movecmd[1], movecmd[0]);
 	double int_x = (tan(theta)*error_x - error_y) / (tan(theta) + 1.0/tan(theta));
@@ -104,12 +111,18 @@ void movecmd_correction(double* movecmd, double* pose)
 	double sidewayerr_x = int_x; 
 	double sidewayerr_y = int_y; 
 
-	static double forwardgain = 0.08;
+	static double forwardgain = 0.2;
 	static double sidewaygain = 0.8; 
 	static double rotationgain = 1.0;  
-	movecmd[0] += -forwardgain * forwarderr_x -sidewaygain * sidewayerr_x;
-	movecmd[1] += -forwardgain * forwarderr_y -sidewaygain * sidewayerr_y;
-	movecmd[2] = -rotationgain * error_t;
+	double correction_x = -forwardgain * forwarderr_x -sidewaygain * sidewayerr_x;
+	double correction_y = -forwardgain * forwarderr_y -sidewaygain * sidewayerr_y;
+	double correction_t = -rotationgain * error_t;
+	//cout<<"cor_x = "<<correction_x<<endl;
+	//cout<<"cor_y = "<<correction_y<<endl;
+	//cout<<"cor_t = "<<correction_t<<endl;
+	movecmd[0] += correction_x * mvcmdvecnorm;
+	movecmd[1] += correction_y * mvcmdvecnorm;
+	movecmd[2] += correction_t;
 }
 
 int main(int argc, char** argv)
@@ -162,7 +175,7 @@ int main(int argc, char** argv)
 			stop(motorout);
 		}
 		PWMwrite(motorout);
-		dispstatus(movecmd, pulse, targetpulse, motorout);
+		//dispstatus(movecmd, pulse, targetpulse, motorout);
 		pulseReset(pulse);
 		markerflag = false;
 		poseflag = false;
