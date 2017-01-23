@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+
+<launch>
+
+  <node name="MPU9250_input" pkg="raspi_gpio" type="MPU9250_input" >
+	  <!--
+	  <param name="cmd_topic" value="/keyjoy/movecmd" />
+	  -->
+  </node>
+  
+  <node name="omni_stick_node" pkg="raspi_gpio" type="omni_stick_node" output="screen" >
+  </node>
+
+</launch>

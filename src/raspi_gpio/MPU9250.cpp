@@ -1,4 +1,4 @@
-#include <raspi_gpio/MPU-9250.h>
+#include <raspi_gpio/MPU9250.h>
 using namespace std;
 
 namespace mpu9250 {
@@ -102,12 +102,12 @@ namespace mpu9250 {
 	axisData ACOFFSET = {0.0, 0.0, 0.0};
 	axisData getAccel(int fd)
 	{
-		int XH = wiringPiI2CReadReg8(fd, 0x43);
-		int XL = wiringPiI2CReadReg8(fd, 0x44);
-		int YH = wiringPiI2CReadReg8(fd, 0x45);
-		int YL = wiringPiI2CReadReg8(fd, 0x46);
-		int ZH = wiringPiI2CReadReg8(fd, 0x47);
-		int ZL = wiringPiI2CReadReg8(fd, 0x47);
+		int XH = wiringPiI2CReadReg8(fd, 0x3b);
+		int XL = wiringPiI2CReadReg8(fd, 0x3c);
+		int YH = wiringPiI2CReadReg8(fd, 0x3d);
+		int YL = wiringPiI2CReadReg8(fd, 0x3e);
+		int ZH = wiringPiI2CReadReg8(fd, 0x3f);
+		int ZL = wiringPiI2CReadReg8(fd, 0x40);
 
 		axisData ans;
 		ans.x = -ACOFFSET.x + S2U(XH << 8 | XL) * ACRANGE / (double)0x8000;
@@ -120,12 +120,12 @@ namespace mpu9250 {
 	axisData GYOFFSET = {0.0, 0.0, 0.0};
 	axisData getGyro(int fd)
 	{
-		int XH = wiringPiI2CReadReg8(fd, 0x3b);
-		int XL = wiringPiI2CReadReg8(fd, 0x3c);
-		int YH = wiringPiI2CReadReg8(fd, 0x3d);
-		int YL = wiringPiI2CReadReg8(fd, 0x3e);
-		int ZH = wiringPiI2CReadReg8(fd, 0x3f);
-		int ZL = wiringPiI2CReadReg8(fd, 0x40);
+		int XH = wiringPiI2CReadReg8(fd, 0x43);
+		int XL = wiringPiI2CReadReg8(fd, 0x44);
+		int YH = wiringPiI2CReadReg8(fd, 0x45);
+		int YL = wiringPiI2CReadReg8(fd, 0x46);
+		int ZH = wiringPiI2CReadReg8(fd, 0x47);
+		int ZL = wiringPiI2CReadReg8(fd, 0x47);
 
 		axisData ans;
 		ans.x = -GYOFFSET.x + S2U(XH << 8 | XL) * GYRANGE / (double)0x8000;
