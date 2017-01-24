@@ -64,6 +64,7 @@ add_executable(omni_stick_node
 
 target_link_libraries(MPU9250_input
 	MPU9250
+	omni
 	${catkin_LIBRARIES}
 	${WIRINGPI_LIBRARY}
 	)

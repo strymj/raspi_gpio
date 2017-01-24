@@ -8,13 +8,11 @@
 //#include <tf/transform_listener.h>
 //tf::TransformListener listener;
 
-// tact switch setup
-#define TACTSW 5
-
 using namespace std;
 
 bool markerflag = false;
 bool poseflag = false;
+bool tactswflag = false;
 bool sensorflag = false;
 
 
@@ -28,7 +26,7 @@ bool sensorflag = false;
 
 void markerflagCallback(const std_msgs::Bool& msg)
 {
-	if(msg.data) markerflag = true;
+	markerflag = msg.data;
 }
 
 void markerposeCallback(const geometry_msgs::PoseStamped& msg)
@@ -44,6 +42,11 @@ void markerposeCallback(const geometry_msgs::PoseStamped& msg)
 	//cout<<"pose_y : "<<pose[1]<<endl;
 	//cout<<"pose_t : "<<pose[2]<<endl;
 	poseflag = true;
+}
+
+void tactswCallback(const std_msgs::Bool& msg)
+{
+	tactswflag = msg.data;
 }
 
 void sensorCallback(const std_msgs::Float32MultiArray& msg)
@@ -69,7 +72,7 @@ void movecmd_detect(double* movecmd, double* sensorvalue)
 	//static double accelgain = 1.2;
 	//movecmd[0] = accelgain * sensorvalue[0];
 	//movecmd[1] = accelgain * sensorvalue[1];
-	static double accelgain = 1.0;
+	static double accelgain = 1.5;
 	double sensor_x = sensorvalue[0];
 	if (1.0 < sensor_x) sensor_x = 1.0;
 	if (sensor_x <-1.0) sensor_x =-1.0;
@@ -111,9 +114,9 @@ void movecmd_correction(double* movecmd, double* pose)
 	double sidewayerr_x = int_x; 
 	double sidewayerr_y = int_y; 
 
-	static double forwardgain = 0.2;
-	static double sidewaygain = 0.8; 
-	static double rotationgain = 1.0;  
+	static double forwardgain = 0.3;
+	static double sidewaygain = 1.5; 
+	static double rotationgain = 2.0;  
 	double correction_x = -forwardgain * forwarderr_x -sidewaygain * sidewayerr_x;
 	double correction_y = -forwardgain * forwarderr_y -sidewaygain * sidewayerr_y;
 	double correction_t = -rotationgain * error_t;
@@ -131,23 +134,26 @@ int main(int argc, char** argv)
 	ros::NodeHandle node_("~");
 
 	int looprate_;
+	bool correction_flag_;
 	double emstop_time_;
-	std::string flag_topic_, pose_topic_, sensor_topic_, lookup_tf_header_, lookup_tf_child_;
+	std::string flag_topic_, pose_topic_, tactsw_topic_, sensor_topic_, lookup_tf_header_, lookup_tf_child_;
 	node_.param("looprate", looprate_, 30);
 	node_.param("markerflag_topic_", flag_topic_, std::string("/marker_detection/MarkerFlag"));
 	node_.param("markerpose_topic_", pose_topic_, std::string("/marker_detection/MarkerPoseReversed"));
+	node_.param("tactsw_topic", tactsw_topic_, std::string("/MPU9250_input/tactswitch"));
 	node_.param("sensor_topic", sensor_topic_, std::string("/MPU9250_input/sensordata"));
 	node_.param("lookup_tf_header", lookup_tf_header_, string("/marker"));
 	node_.param("lookup_tf_child", lookup_tf_child_, string("/cam"));
+	node_.param("correction", correction_flag_, true);
 	ros::Subscriber markerflagSub = node_.subscribe(flag_topic_, 1, markerflagCallback);
 	ros::Subscriber markerposeSub = node_.subscribe(pose_topic_, 1, markerposeCallback);
+	ros::Subscriber TactSwSub = node_.subscribe(tactsw_topic_, 1, tactswCallback);
 	ros::Subscriber SensorSub = node_.subscribe(sensor_topic_, 1, sensorCallback);
 	ros::Rate looprate(looprate_);
 
 	GpioInit();
 	PwmCreateSetup();
 	pinModeInputSetup();
-	pinMode(TACTSW, INPUT);
 	wiringPiISRSetup();
 
 	while(ros::ok())
@@ -156,9 +162,10 @@ int main(int argc, char** argv)
 			cout<<"ac_x  : "<<sensorvalue[0]<<endl;
 			cout<<"ac_y  : "<<sensorvalue[1]<<endl;
 			cout<<"gy_z  : "<<sensorvalue[5]<<endl;
-			if (digitalRead(TACTSW)) {
+			
+			if (tactswflag) {
 				movecmd_detect(movecmd, sensorvalue);
-				if (markerflag && poseflag) {
+				if (correction_flag_ && markerflag && poseflag) {
 					movecmd_correction(movecmd, pose);
 				}
 			}
@@ -179,6 +186,7 @@ int main(int argc, char** argv)
 		pulseReset(pulse);
 		markerflag = false;
 		poseflag = false;
+		tactswflag = false;
 		sensorflag = false;
 		ros::spinOnce();
 		looprate.sleep();

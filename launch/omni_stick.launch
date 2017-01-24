@@ -9,6 +9,7 @@
   </node>
   
   <node name="omni_stick_node" pkg="raspi_gpio" type="omni_stick_node" output="screen" >
+	  <param name="correction" value="false" />
   </node>
 
 </launch>

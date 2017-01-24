@@ -1,7 +1,12 @@
 #include <ros/ros.h>
+#include <raspi_gpio/omni.h>
 #include <raspi_gpio/MPU9250.h>
+#include <std_msgs/Bool.h>
 #include <std_msgs/Float32MultiArray.h>
 using namespace std;
+
+// tact switch setup
+#define TACTSW 5
 
 int main(int argc, char** argv)
 {
@@ -10,8 +15,12 @@ int main(int argc, char** argv)
 
 	int looprate_, ID_;
 	node_.param("looprate", looprate_, 30);
+	ros::Publisher TactSwitchPub = node_.advertise<std_msgs::Bool>("tactswitch",1);
 	ros::Publisher MPU9250Pub = node_.advertise<std_msgs::Float32MultiArray>("sensordata",1);
 	ros::Rate looprate(looprate_);
+
+	GpioInit();
+	pinMode(TACTSW, INPUT);
 
 	int fd_acgy = mpu9250::I2CInit(0x69);
 	mpu9250::StartSensing(fd_acgy);
@@ -23,6 +32,7 @@ int main(int argc, char** argv)
 	//mpu9250::gyroOffset(fd_acgy);
 	mpu9250::MagModeSet(fd_mag, MAG_MODE_100HZ);
 
+	bool tactswitch;
 	mpu9250::axisData ac;
 	mpu9250::axisData gy;
 	mpu9250::axisData mg;
@@ -31,6 +41,7 @@ int main(int argc, char** argv)
 
 	while(ros::ok())
 	{
+		tactswitch = digitalRead(TACTSW);
 		ac = mpu9250::getAccel(fd_acgy);
 		gy = mpu9250::getGyro(fd_acgy);
 		mg = mpu9250::getMag(fd_mag);
@@ -45,6 +56,10 @@ int main(int argc, char** argv)
 		cout<<"magneY : "<<mg.y<<endl;
 		cout<<"magneZ : "<<mg.z<<endl;
 		cout<<endl;
+	
+		std_msgs::Bool tactsw_msg;
+		tactsw_msg.data = tactswitch;
+		TactSwitchPub.publish(tactsw_msg);
 		
 		std_msgs::Float32MultiArray MPU9250_msg;
 		MPU9250_msg.data.push_back(ac.x);
