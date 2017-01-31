@@ -79,9 +79,23 @@ void movecmd_detect(double* movecmd, double* sensorvalue)
 	double sensor_y = sensorvalue[1];
 	if (1.0 < sensor_y) sensor_y = 1.0;
 	if (sensor_y <-1.0) sensor_y =-1.0;
-	movecmd[0] = accelgain * -(acos(sensor_x)-M_PI/2);
-	movecmd[1] = accelgain * -(acos(sensor_y)-M_PI/2);
+	
+	double move_x = accelgain * -(acos(sensor_x)-M_PI/2);
+	double move_y = accelgain * -(acos(sensor_y)-M_PI/2);
+	double norm = sqrt(move_x*move_x + move_y+move_y);
+	if(1<norm) {
+		move_x /= norm;
+		move_y /= norm;
+	}
+	
+	movecmd[0] = move_x;
+	movecmd[1] = move_y;
 	movecmd[2] = 0.0;
+	
+	if(1.0 < movecmd[0]) movecmd[0] = 1.0;
+	else if(movecmd[0] < -1.0) movecmd[0] = -1.0;
+	if(1.0 < movecmd[1]) movecmd[1] = 1.0;
+	else if(movecmd[1] < -1.0) movecmd[1] = -1.0;
 }
 
 void movecmd_correction(double* movecmd, double* pose)
@@ -114,9 +128,9 @@ void movecmd_correction(double* movecmd, double* pose)
 	double sidewayerr_x = int_x; 
 	double sidewayerr_y = int_y; 
 
-	static double forwardgain = 0.3;
-	static double sidewaygain = 1.5; 
-	static double rotationgain = 2.0;  
+	static double forwardgain = 0.1;
+	static double sidewaygain = 6.0; 
+	static double rotationgain = 3.0;  
 	double correction_x = -forwardgain * forwarderr_x -sidewaygain * sidewayerr_x;
 	double correction_y = -forwardgain * forwarderr_y -sidewaygain * sidewayerr_y;
 	double correction_t = -rotationgain * error_t;
@@ -126,6 +140,13 @@ void movecmd_correction(double* movecmd, double* pose)
 	movecmd[0] += correction_x * mvcmdvecnorm;
 	movecmd[1] += correction_y * mvcmdvecnorm;
 	movecmd[2] += correction_t;
+	
+	if(1.0 < movecmd[0]) movecmd[0] = 1.0;
+	else if(movecmd[0] < -1.0) movecmd[0] = -1.0;
+	if(1.0 < movecmd[1]) movecmd[1] = 1.0;
+	else if(movecmd[1] < -1.0) movecmd[1] = -1.0;
+	if(1.0 < movecmd[2]) movecmd[2] = 1.0;
+	else if(movecmd[2] < -1.0) movecmd[2] = -1.0;
 }
 
 int main(int argc, char** argv)
@@ -162,6 +183,7 @@ int main(int argc, char** argv)
 			cout<<"ac_x  : "<<sensorvalue[0]<<endl;
 			cout<<"ac_y  : "<<sensorvalue[1]<<endl;
 			cout<<"gy_z  : "<<sensorvalue[5]<<endl;
+			cout<<endl;
 			
 			if (tactswflag) {
 				movecmd_detect(movecmd, sensorvalue);

@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# usage
+# sh addsudo.sh <filename> <password>
+
 place=~/catkin_ws/devel/lib/raspi_gpio/
 cd ${place}
 
