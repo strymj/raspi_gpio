@@ -34,6 +34,7 @@ static double wrad[3] = {0, M_PI*2/3, M_PI*4/3};   // 0, 120, 240 [deg]
 
 class omni{
 	public:
+		omni();
 		void GpioInit();
 		void PwmCreateSetup();
 		void wiringPiISRSetup();
@@ -44,12 +45,12 @@ class omni{
 		void dispstatus();
 		void pulseReset();
 	private:
-		double movecmd[3] = {};
-		int pulse[3] = {};
-		int targetpulse[3] = {};
-		double motorout[3] = {0,0,0};
-		double gain[3] = {0.008, 0.001, 0.010};   // p, i, d gain
-		double ratio[2] = {0.8, 0.2};    // ratio move : rotate
+		double movecmd[3];
+		int pulse[3];
+		int targetpulse[3];
+		double motorout[3];
+		double gain[3];   // p, i, d gain
+		double ratio[2];    // ratio move : rotate
 		void pin1A_changed();
 		void pin1B_changed();
 		void pin2A_changed();

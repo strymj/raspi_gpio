@@ -16,7 +16,7 @@ bool tactswflag = false;
 bool sensorflag = false;
 double pose[3] = {};
 double motion[3] = {};
-double sensorvalue[9] = {} ;
+double sensorvalue[9] = {};
 
 
 //void correctionCallback(const std_msgs::Float32MultiArray& msg)
@@ -176,10 +176,11 @@ int main(int argc, char** argv)
 	ros::Subscriber SensorSub = node_.subscribe(sensor_topic_, 1, sensorCallback);
 	ros::Rate looprate(looprate_);
 
-	GpioInit();
-	PwmCreateSetup();
-	pinModeInputSetup();
-	wiringPiISRSetup();
+	Omni omni;
+	omni.GpioInit();
+	omni.PwmCreateSetup();
+	omni.pinModeInputSetup();
+	omni.wiringPiISRSetup();
 
 	while(ros::ok())
 	{
