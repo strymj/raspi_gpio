@@ -31,32 +31,34 @@
 static double MAXPULSE = 3000.0 / 30;   // 3000[pulse/s] / 30[/s]
 static double wrad[3] = {0, M_PI*2/3, M_PI*4/3};   // 0, 120, 240 [deg]
 
-double movecmd[3] = {0,0,0};
-double pose[3] = {0,0,0};
-double sensorvalue[9] = {0,0,0,0,0,0,0,0,0};
-int pulse[3] = {0,0,0};
-int targetpulse[3] = {0,0,0};
-double motorout[3] = {0,0,0};
-double gain[3] = {0.008, 0.001, 0.010};   // p, i, d gain
-double ratio[2] = {0.8, 0.2};    // ratio move : rotate
 
-void GpioInit(void);
-void PwmCreateSetup(void);
-void wiringPiISRSetup(void);
-void pinModeInputSetup(void);
-
-void pin1A_changed(void);
-void pin1B_changed(void);
-void pin2A_changed(void);
-void pin2B_changed(void);
-void pin3A_changed(void);
-void pin3B_changed(void);
-
-void stop(double*);
-void calc_targetpulse(int*, double*, double*);
-void calc_motorout(double*, int*, int*, double*);
-void PWMwrite(double*);
-void pulseReset(int*);
-void dispstatus(double*, int*, int*, double*);
+class omni{
+	public:
+		void GpioInit();
+		void PwmCreateSetup();
+		void wiringPiISRSetup();
+		void pinModeInputSetup();
+		void movecmd_write(double,double,double);
+		void output();
+		void stop();
+		void dispstatus();
+		void pulseReset();
+	private:
+		double movecmd[3] = {};
+		int pulse[3] = {};
+		int targetpulse[3] = {};
+		double motorout[3] = {0,0,0};
+		double gain[3] = {0.008, 0.001, 0.010};   // p, i, d gain
+		double ratio[2] = {0.8, 0.2};    // ratio move : rotate
+		void pin1A_changed();
+		void pin1B_changed();
+		void pin2A_changed();
+		void pin2B_changed();
+		void pin3A_changed();
+		void pin3B_changed();
+		void calc_targetpulse();
+		void calc_motorout();
+		void PWMwrite();
+};
 
 #endif

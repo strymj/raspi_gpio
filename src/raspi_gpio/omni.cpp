@@ -1,7 +1,19 @@
 #include <raspi_gpio/omni.h>
 using namespace std;
 
-void GpioInit(void)
+//omni::omni()
+//{
+//	movecmd[3] = {};
+//	pose[3] = {};
+//	sensorvalue[9] = {};
+//	pulse[3] = {};
+//	targetpulse[3] = {};
+//	motorout[3] = {};
+//	gain[3] = {0.008, 0.001, 0.010};   // p, i, d gain
+//	ratio[2] = {0.8, 0.2};    // ratio move : rotate
+//}
+
+void omni::GpioInit(void)
 {
 	if(wiringPiSetupGpio() == -1) {
 		cout<<"cannot setup gpio."<<endl;
@@ -12,7 +24,7 @@ void GpioInit(void)
 	}
 }
 
-void PwmCreateSetup(void)
+void omni::PwmCreateSetup(void)
 {
 	softPwmCreate(MOTOR1A, 0, RANGE);
 	softPwmCreate(MOTOR1B, 0, RANGE);
@@ -22,7 +34,7 @@ void PwmCreateSetup(void)
 	softPwmCreate(MOTOR3B, 0, RANGE);
 }
 
-void pinModeInputSetup(void)
+void omni::pinModeInputSetup(void)
 {
 	pinMode(SIG1A, INPUT);
 	pinMode(SIG1B, INPUT);
@@ -32,7 +44,7 @@ void pinModeInputSetup(void)
 	pinMode(SIG3B, INPUT);
 }
 
-void wiringPiISRSetup(void)
+void omni::wiringPiISRSetup(void)
 {
 	wiringPiISR(SIG1A, INT_EDGE_BOTH, pin1A_changed);
 	wiringPiISR(SIG1B, INT_EDGE_BOTH, pin1B_changed);
@@ -42,7 +54,7 @@ void wiringPiISRSetup(void)
 	wiringPiISR(SIG3B, INT_EDGE_BOTH, pin3B_changed);
 }
 
-void pin1A_changed(void)
+void omni::pin1A_changed(void)
 {
 	if(digitalRead(SIG1A)) {
 		if(digitalRead(SIG1B)) pulse[0]--;
@@ -54,7 +66,7 @@ void pin1A_changed(void)
 	}
 }
 
-void pin1B_changed(void)
+void omni::pin1B_changed(void)
 {
 	if(digitalRead(SIG1A)) {
 		if(digitalRead(SIG1B)) pulse[0]++;
@@ -66,7 +78,7 @@ void pin1B_changed(void)
 	}
 }
 
-void pin2A_changed(void)
+void omni::pin2A_changed(void)
 {
 	if(digitalRead(SIG2A)) {
 		if(digitalRead(SIG2B)) pulse[1]--;
@@ -78,7 +90,7 @@ void pin2A_changed(void)
 	}
 }
 
-void pin2B_changed(void)
+void omni::pin2B_changed(void)
 {
 	if(digitalRead(SIG2A)) {
 		if(digitalRead(SIG2B)) pulse[1]++;
@@ -90,7 +102,7 @@ void pin2B_changed(void)
 	}
 }
 
-void pin3A_changed(void)
+void omni::pin3A_changed(void)
 {
 	if(digitalRead(SIG3A)) {
 		if(digitalRead(SIG3B)) pulse[2]--;
@@ -102,7 +114,7 @@ void pin3A_changed(void)
 	}
 }
 
-void pin3B_changed(void)
+void omni::pin3B_changed(void)
 {
 	if(digitalRead(SIG3A)) {
 		if(digitalRead(SIG3B)) pulse[2]++;
@@ -114,28 +126,33 @@ void pin3B_changed(void)
 	}
 }
 
-void stop(double* motorout)
+void omni::movecmd_write(double x, double y, double t)
 {
-	motorout[0] = 0.0;
-	motorout[1] = 0.0;
-	motorout[2] = 0.0;
+	movecmd[0] = x;
+	movecmd[1] = y;
+	movecmd[2] = t;
+
+	for(int i=0; i<3; i++) {
+		if(movecmd[i] > 1) movecmd[i] = 1;
+		if(movecmd[i] <-1) movecmd[i] =-1;
+	}
 }
 
-void calc_targetpulse(int* targetpulse, double* movecmd, double* ratio)
+void omni::calc_targetpulse()
 {
 	double norm = sqrt(movecmd[0]*movecmd[0] + movecmd[1]*movecmd[1]);
 	if(norm>1) {
 		movecmd[0] /= norm;
 		movecmd[1] /= norm;
 	}
-	for(int i=0; i<NOW; i++) {
+	for(int i=0; i<3; i++) {
 		double pulseMove = ratio[0] * (movecmd[0]*cos(wrad[i]) + movecmd[1]*sin(wrad[i]));
 		double pulseRotate = -ratio[1] * movecmd[2];
 		targetpulse[i] = MAXPULSE * (pulseMove + pulseRotate);
 	}
 }
 
-void calc_motorout(double* motorout, int* pulse, int* target, double* gain)
+void omni::calc_motorout()
 {
 	static int Past[3] = {0,0,0};
 	static int Diff[3] = {0,0,0};
@@ -154,7 +171,7 @@ void calc_motorout(double* motorout, int* pulse, int* target, double* gain)
 	}
 }
 
-void PWMwrite(double* motorout)
+void omni::PWMwrite()
 {
 	if(motorout[0]>=0) {
 		softPwmWrite(MOTOR1A, motorout[0] * RANGE);
@@ -181,16 +198,31 @@ void PWMwrite(double* motorout)
 	}
 }
 
-void dispstatus(double* m_cmd, int* pulse, int* t_pul, double* motor)
+void omni::output()
 {
-	cout<<"m_cmd = "<<m_cmd[0]<<", "<<m_cmd[1]<<", "<<m_cmd[2]<<endl;
+	calc_targetpulse();
+	calc_motorout();
+	PWMwrite();
+}
+
+void omni::stop()
+{
+	motorout[0] = 0.0;
+	motorout[1] = 0.0;
+	motorout[2] = 0.0;
+	PWMwrite();
+}
+
+void omni::dispstatus()
+{
+	cout<<"m_cmd = "<<movecmd[0]<<", "<<movecmd[1]<<", "<<movecmd[2]<<endl;
 	cout<<"pulse = "<<pulse[0]<<", "<<pulse[1]<<", "<<pulse[2]<<endl;
-	cout<<"t_pul = "<<t_pul[0]<<", "<<t_pul[1]<<", "<<t_pul[2]<<endl;
-	cout<<"motor = "<<motor[0]<<", "<<motor[1]<<", "<<motor[2]<<endl;
+	cout<<"t_pul = "<<targetpulse[0]<<", "<<targetpulse[1]<<", "<<targetpulse[2]<<endl;
+	cout<<"motor = "<<motorout[0]<<", "<<motorout[1]<<", "<<motorout[2]<<endl;
 	cout<<endl;
 }
 
-void pulseReset(int* pulse)
+void omni::pulseReset()
 {
 	pulse[0] = 0;
 	pulse[1] = 0;

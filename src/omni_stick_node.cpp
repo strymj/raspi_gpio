@@ -14,6 +14,9 @@ bool markerflag = false;
 bool poseflag = false;
 bool tactswflag = false;
 bool sensorflag = false;
+double pose[3] = {};
+double motion[3] = {};
+double sensorvalue[9] = {} ;
 
 
 //void correctionCallback(const std_msgs::Float32MultiArray& msg)
@@ -23,6 +26,7 @@ bool sensorflag = false;
 //	correctioncmd[2] = msg.data[2];
 //	correctioncmdflag = true;
 //}
+
 
 void markerflagCallback(const std_msgs::Bool& msg)
 {
@@ -67,11 +71,11 @@ void sensorCallback(const std_msgs::Float32MultiArray& msg)
 	sensorflag = true;
 }
 
-void movecmd_detect(double* movecmd, double* sensorvalue)
+void motion_detect()
 {
 	//static double accelgain = 1.2;
-	//movecmd[0] = accelgain * sensorvalue[0];
-	//movecmd[1] = accelgain * sensorvalue[1];
+	//motion[0] = accelgain * sensorvalue[0];
+	//motion[1] = accelgain * sensorvalue[1];
 	static double accelgain = 1.5;
 	double sensor_x = sensorvalue[0];
 	if (1.0 < sensor_x) sensor_x = 1.0;
@@ -88,17 +92,17 @@ void movecmd_detect(double* movecmd, double* sensorvalue)
 		move_y /= norm;
 	}
 	
-	movecmd[0] = move_x;
-	movecmd[1] = move_y;
-	movecmd[2] = 0.0;
+	motion[0] = move_x;
+	motion[1] = move_y;
+	motion[2] = 0.0;
 	
-	if(1.0 < movecmd[0]) movecmd[0] = 1.0;
-	else if(movecmd[0] < -1.0) movecmd[0] = -1.0;
-	if(1.0 < movecmd[1]) movecmd[1] = 1.0;
-	else if(movecmd[1] < -1.0) movecmd[1] = -1.0;
+	if(1.0 < motion[0]) motion[0] = 1.0;
+	else if(motion[0] < -1.0) motion[0] = -1.0;
+	if(1.0 < motion[1]) motion[1] = 1.0;
+	else if(motion[1] < -1.0) motion[1] = -1.0;
 }
 
-void movecmd_correction(double* movecmd, double* pose)
+void motion_correction(double* motion, double* pose)
 {
 	//static tf::StampedTransform transform;
 	//try{
@@ -114,12 +118,12 @@ void movecmd_correction(double* movecmd, double* pose)
 	//double error_y = transform.getOrigin().y();
 	//double error_t = yaw;
 
-	double mvcmdvecnorm = sqrt(movecmd[0]*movecmd[0] + movecmd[1]*movecmd[1]);
+	double mvcmdvecnorm = sqrt(motion[0]*motion[0] + motion[1]*motion[1]);
 	double error_x = pose[0];
 	double error_y = pose[1];
 	double error_t = pose[2];
 
-	double theta = atan2(movecmd[1], movecmd[0]);
+	double theta = atan2(motion[1], motion[0]);
 	double int_x = (tan(theta)*error_x - error_y) / (tan(theta) + 1.0/tan(theta));
 	double int_y = -1.0/tan(theta) * int_x;
 
@@ -137,16 +141,16 @@ void movecmd_correction(double* movecmd, double* pose)
 	//cout<<"cor_x = "<<correction_x<<endl;
 	//cout<<"cor_y = "<<correction_y<<endl;
 	//cout<<"cor_t = "<<correction_t<<endl;
-	movecmd[0] += correction_x * mvcmdvecnorm;
-	movecmd[1] += correction_y * mvcmdvecnorm;
-	movecmd[2] += correction_t;
+	motion[0] += correction_x * mvcmdvecnorm;
+	motion[1] += correction_y * mvcmdvecnorm;
+	motion[2] += correction_t;
 	
-	if(1.0 < movecmd[0]) movecmd[0] = 1.0;
-	else if(movecmd[0] < -1.0) movecmd[0] = -1.0;
-	if(1.0 < movecmd[1]) movecmd[1] = 1.0;
-	else if(movecmd[1] < -1.0) movecmd[1] = -1.0;
-	if(1.0 < movecmd[2]) movecmd[2] = 1.0;
-	else if(movecmd[2] < -1.0) movecmd[2] = -1.0;
+	if(1.0 < motion[0]) motion[0] = 1.0;
+	else if(motion[0] < -1.0) motion[0] = -1.0;
+	if(1.0 < motion[1]) motion[1] = 1.0;
+	else if(motion[1] < -1.0) motion[1] = -1.0;
+	if(1.0 < motion[2]) motion[2] = 1.0;
+	else if(motion[2] < -1.0) motion[2] = -1.0;
 }
 
 int main(int argc, char** argv)
@@ -186,26 +190,23 @@ int main(int argc, char** argv)
 			cout<<endl;
 			
 			if (tactswflag) {
-				movecmd_detect(movecmd, sensorvalue);
+				motion_detect();
 				if (correction_flag_ && markerflag && poseflag) {
-					movecmd_correction(movecmd, pose);
+					motion_correction();
 				}
+				omni.movecmd_write(motion[0], motion[1], motion[2]);
 			}
 			else {
-				movecmd[0] = 0;
-				movecmd[1] = 0;
-				movecmd[2] = 0;
+				omni.motion_write(0,0,0);
 			}
+			omni.output();
 
-			calc_targetpulse(targetpulse, movecmd, ratio);
-			calc_motorout(motorout, pulse, targetpulse, gain);
 		}
 		else {
-			stop(motorout);
+			omni.stop();
 		}
-		PWMwrite(motorout);
-		//dispstatus(movecmd, pulse, targetpulse, motorout);
-		pulseReset(pulse);
+		//omni.dispstatus();
+		omni.pulseReset();
 		markerflag = false;
 		poseflag = false;
 		tactswflag = false;
