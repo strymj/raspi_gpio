@@ -29,6 +29,10 @@ add_library(MPU9250
 	src/${PROJECT_NAME}/MPU9250.cpp
 	)
 
+add_library(MX28
+	src/${PROJECT_NAME}/MX28.cpp
+	)
+
 #add_executable(LED_gpio18
 #	src/LED_gpio18.cpp
 #	)
@@ -47,6 +51,9 @@ add_executable(omni_node
 	)
 add_executable(omni_stick_node
 	src/omni_stick_node.cpp
+	)
+add_executable(MX28_node
+	src/MX28_node.cpp
 	)
 
 #target_link_libraries(LED_gpio18
@@ -75,6 +82,11 @@ target_link_libraries(omni_node
 	)
 target_link_libraries(omni_stick_node
 	omni
+	${catkin_LIBRARIES}
+	${WIRINGPI_LIBRARY}
+	)
+target_link_libraries(MX28_node
+	MX28
 	${catkin_LIBRARIES}
 	${WIRINGPI_LIBRARY}
 	)

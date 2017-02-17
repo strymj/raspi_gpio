@@ -18,6 +18,7 @@ double pose[3] = {};
 double motion[3] = {};
 double sensorvalue[9] = {};
 
+Omni omni;
 
 //void correctionCallback(const std_msgs::Float32MultiArray& msg)
 //{
@@ -176,11 +177,16 @@ int main(int argc, char** argv)
 	ros::Subscriber SensorSub = node_.subscribe(sensor_topic_, 1, sensorCallback);
 	ros::Rate looprate(looprate_);
 
-	Omni omni;
 	omni.GpioInit();
 	omni.PwmCreateSetup();
 	omni.pinModeInputSetup();
-	omni.wiringPiISRSetup();
+	//omni.wiringPiISRSetup();
+	wiringPiISR(SIG1A, INT_EDGE_BOTH, pin1A_changed);
+	wiringPiISR(SIG1B, INT_EDGE_BOTH, pin1B_changed);
+	wiringPiISR(SIG2A, INT_EDGE_BOTH, pin2A_changed);
+	wiringPiISR(SIG2B, INT_EDGE_BOTH, pin2B_changed);
+	wiringPiISR(SIG3A, INT_EDGE_BOTH, pin3A_changed);
+	wiringPiISR(SIG3B, INT_EDGE_BOTH, pin3B_changed);
 
 	while(ros::ok())
 	{
@@ -193,12 +199,12 @@ int main(int argc, char** argv)
 			if (tactswflag) {
 				motion_detect();
 				if (correction_flag_ && markerflag && poseflag) {
-					motion_correction();
+					motion_correction(motion, pose);
 				}
 				omni.movecmd_write(motion[0], motion[1], motion[2]);
 			}
 			else {
-				omni.motion_write(0,0,0);
+				omni.movecmd_write(0,0,0);
 			}
 			omni.output();
 

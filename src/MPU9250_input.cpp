@@ -8,6 +8,8 @@ using namespace std;
 // tact switch setup
 #define TACTSW 5
 
+Omni omni;
+
 int main(int argc, char** argv)
 {
 	ros::init(argc, argv, "gyro_input");
@@ -19,7 +21,7 @@ int main(int argc, char** argv)
 	ros::Publisher MPU9250Pub = node_.advertise<std_msgs::Float32MultiArray>("sensordata",1);
 	ros::Rate looprate(looprate_);
 
-	GpioInit();
+	omni.GpioInit();
 	pinMode(TACTSW, INPUT);
 
 	int fd_acgy = mpu9250::I2CInit(0x69);

@@ -3,13 +3,15 @@
 #include <raspi_gpio/omni.h>
 #include <string>
 
+Omni omni;
 bool movecmdflag = false;
+double motion[3] = {};
 
 void movecmdCallback(const std_msgs::Float32MultiArray& msg)
 {
-	movecmd[0] = msg.data[0];
-	movecmd[1] = msg.data[1];
-	movecmd[2] = msg.data[2];
+	motion[0] = msg.data[0];
+	motion[1] = msg.data[1];
+	motion[2] = msg.data[2];
 	movecmdflag = true;
 }
 
@@ -27,23 +29,28 @@ int main(int argc, char** argv)
 	ros::Subscriber MovecmdSub = node_.subscribe(cmd_topic_, 1, movecmdCallback);
 	ros::Rate looprate(looprate_);
 
-	GpioInit();
-	PwmCreateSetup();
-	pinModeInputSetup();
-	wiringPiISRSetup();
+	omni.GpioInit();
+	omni.PwmCreateSetup();
+	omni.pinModeInputSetup();
+	//omni.wiringPiISRSetup();
+	wiringPiISR(SIG1A, INT_EDGE_BOTH, pin1A_changed);
+	wiringPiISR(SIG1B, INT_EDGE_BOTH, pin1B_changed);
+	wiringPiISR(SIG2A, INT_EDGE_BOTH, pin2A_changed);
+	wiringPiISR(SIG2B, INT_EDGE_BOTH, pin2B_changed);
+	wiringPiISR(SIG3A, INT_EDGE_BOTH, pin3A_changed);
+	wiringPiISR(SIG3B, INT_EDGE_BOTH, pin3B_changed);
 
 	while(ros::ok())
 	{
 		if(movecmdflag) { 
-			calc_targetpulse(targetpulse, movecmd, ratio);
-			calc_motorout(motorout, pulse, targetpulse, gain);
+			omni.movecmd_write(motion[0], motion[1], motion[2]);
+			omni.output();
 		}
 		else {
-			stop(motorout);
+			omni.stop();
 		}
-		PWMwrite(motorout);
-		dispstatus(movecmd, pulse, targetpulse, motorout);
-		pulseReset(pulse);
+		//omni.dispstatus();
+		omni.pulseReset();
 		movecmdflag = false;
 		ros::spinOnce();
 		looprate.sleep();

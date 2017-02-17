@@ -1,5 +1,78 @@
-#include <raspi_gpio/Omni.h>
+#include <raspi_gpio/omni.h>
 using namespace std;
+
+void pin1A_changed(void)
+{
+	if(digitalRead(SIG1A)) {
+		if(digitalRead(SIG1B)) pulse[0]--;
+		else pulse[0]++;
+	}
+	else {
+		if(digitalRead(SIG1B)) pulse[0]++;
+		else pulse[0]--;
+	}
+}
+
+void pin1B_changed(void)
+{
+	if(digitalRead(SIG1A)) {
+		if(digitalRead(SIG1B)) pulse[0]++;
+		else pulse[0]--;
+	}
+	else {
+		if(digitalRead(SIG1B)) pulse[0]--;
+		else pulse[0]++;
+	}
+}
+
+void pin2A_changed(void)
+{
+	if(digitalRead(SIG2A)) {
+		if(digitalRead(SIG2B)) pulse[1]--;
+		else pulse[1]++;
+	}
+	else {
+		if(digitalRead(SIG2B)) pulse[1]++;
+		else pulse[1]--;
+	}
+}
+
+void pin2B_changed(void)
+{
+	if(digitalRead(SIG2A)) {
+		if(digitalRead(SIG2B)) pulse[1]++;
+		else pulse[1]--;
+	}
+	else {
+		if(digitalRead(SIG2B)) pulse[1]--;
+		else pulse[1]++;
+	}
+}
+
+void pin3A_changed(void)
+{
+	if(digitalRead(SIG3A)) {
+		if(digitalRead(SIG3B)) pulse[2]--;
+		else pulse[2]++;
+	}
+	else {
+		if(digitalRead(SIG3B)) pulse[2]++;
+		else pulse[2]--;
+	}
+}
+
+void pin3B_changed(void)
+{
+	if(digitalRead(SIG3A)) {
+		if(digitalRead(SIG3B)) pulse[2]++;
+		else pulse[2]--;
+	}
+	else {
+		if(digitalRead(SIG3B)) pulse[2]--;
+		else pulse[2]++;
+	}
+}
+
 
 Omni::Omni()
 {
@@ -11,6 +84,13 @@ Omni::Omni()
 	// translation rotation ratio initialize
 	ratio[0] = 0.8;    // move
 	ratio[1] = 0.2;    // rotate
+
+	//func = pin1A_changed;
+	//pin_changed[1] = pin1B_changed;
+	//pin_changed[2] = pin2A_changed;
+	//pin_changed[3] = pin2B_changed;
+	//pin_changed[4] = pin3A_changed;
+	//pin_changed[5] = pin3B_changed;
 }
 
 void Omni::GpioInit(void)
@@ -44,87 +124,15 @@ void Omni::pinModeInputSetup(void)
 	pinMode(SIG3B, INPUT);
 }
 
-void Omni::wiringPiISRSetup(void)
-{
-	wiringPiISR(SIG1A, INT_EDGE_BOTH, pin1A_changed);
-	wiringPiISR(SIG1B, INT_EDGE_BOTH, pin1B_changed);
-	wiringPiISR(SIG2A, INT_EDGE_BOTH, pin2A_changed);
-	wiringPiISR(SIG2B, INT_EDGE_BOTH, pin2B_changed);
-	wiringPiISR(SIG3A, INT_EDGE_BOTH, pin3A_changed);
-	wiringPiISR(SIG3B, INT_EDGE_BOTH, pin3B_changed);
-}
-
-void Omni::pin1A_changed(void)
-{
-	if(digitalRead(SIG1A)) {
-		if(digitalRead(SIG1B)) pulse[0]--;
-		else pulse[0]++;
-	}
-	else {
-		if(digitalRead(SIG1B)) pulse[0]++;
-		else pulse[0]--;
-	}
-}
-
-void Omni::pin1B_changed(void)
-{
-	if(digitalRead(SIG1A)) {
-		if(digitalRead(SIG1B)) pulse[0]++;
-		else pulse[0]--;
-	}
-	else {
-		if(digitalRead(SIG1B)) pulse[0]--;
-		else pulse[0]++;
-	}
-}
-
-void Omni::pin2A_changed(void)
-{
-	if(digitalRead(SIG2A)) {
-		if(digitalRead(SIG2B)) pulse[1]--;
-		else pulse[1]++;
-	}
-	else {
-		if(digitalRead(SIG2B)) pulse[1]++;
-		else pulse[1]--;
-	}
-}
-
-void Omni::pin2B_changed(void)
-{
-	if(digitalRead(SIG2A)) {
-		if(digitalRead(SIG2B)) pulse[1]++;
-		else pulse[1]--;
-	}
-	else {
-		if(digitalRead(SIG2B)) pulse[1]--;
-		else pulse[1]++;
-	}
-}
-
-void Omni::pin3A_changed(void)
-{
-	if(digitalRead(SIG3A)) {
-		if(digitalRead(SIG3B)) pulse[2]--;
-		else pulse[2]++;
-	}
-	else {
-		if(digitalRead(SIG3B)) pulse[2]++;
-		else pulse[2]--;
-	}
-}
-
-void Omni::pin3B_changed(void)
-{
-	if(digitalRead(SIG3A)) {
-		if(digitalRead(SIG3B)) pulse[2]++;
-		else pulse[2]--;
-	}
-	else {
-		if(digitalRead(SIG3B)) pulse[2]--;
-		else pulse[2]++;
-	}
-}
+//void Omni::wiringPiISRSetup(void)
+//{
+//	wiringPiISR(SIG1A, INT_EDGE_BOTH, &Omni::pin1A_changed());
+//	wiringPiISR(SIG1B, INT_EDGE_BOTH, &Omni::pin1B_changed());
+//	wiringPiISR(SIG2A, INT_EDGE_BOTH, &Omni::pin2A_changed());
+//	wiringPiISR(SIG2B, INT_EDGE_BOTH, &Omni::pin2B_changed());
+//	wiringPiISR(SIG3A, INT_EDGE_BOTH, &Omni::pin3A_changed());
+//	wiringPiISR(SIG3B, INT_EDGE_BOTH, &Omni::pin3B_changed());
+//}
 
 void Omni::movecmd_write(double x, double y, double t)
 {
