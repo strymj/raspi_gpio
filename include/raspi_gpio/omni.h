@@ -19,10 +19,10 @@
 #define MOTOR3B 27
 
 // OMRON E6A2-CW3C ENCODER INPUT
-//#define SIG1A 6     // OUT B
-//#define SIG1B 13    // OUT A
-#define SIG1A 10     // OUT B
-#define SIG1B 9    // OUT A
+#define SIG1A 6     // OUT B
+#define SIG1B 13    // OUT A
+//#define SIG1A 10     // OUT B
+//#define SIG1B 9    // OUT A
 #define SIG2A 19
 #define SIG2B 26
 #define SIG3A 20

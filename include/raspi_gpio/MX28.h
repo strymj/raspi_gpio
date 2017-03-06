@@ -7,7 +7,10 @@
 class MX28{
 	public:
 		MX28();
+		void portOpen();
 	private:
+		int fd;
+		int baudrate;
 };
 
 #endif

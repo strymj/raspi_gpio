@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+
+<launch>
+
+  <node name="MX28" pkg="raspi_gpio" type="MX28_node" output="screen" >
+	  <!--
+	  <param name="cmd_topic" value="/keyjoy/movecmd" />
+	  -->
+  </node>
+  
+</launch>

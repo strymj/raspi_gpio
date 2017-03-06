@@ -10,8 +10,8 @@ int main(int argc, char** argv)
 	int looprate_;
 	node_.param("looprate", looprate_, 30);
 	ros::Rate looprate(looprate_);
-
 	MX28 mx28;
+	mx28.portOpen();
 
 	while(ros::ok())
 	{

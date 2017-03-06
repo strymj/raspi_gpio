@@ -82,8 +82,8 @@ Omni::Omni()
 	gain[2] = 0.010;   // d gain
 
 	// translation rotation ratio initialize
-	ratio[0] = 0.8;    // move
-	ratio[1] = 0.2;    // rotate
+	ratio[0] = 0.7;    // move
+	ratio[1] = 0.3;    // rotate
 
 	//func = pin1A_changed;
 	//pin_changed[1] = pin1B_changed;
