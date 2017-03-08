@@ -73,24 +73,31 @@ void pin3B_changed(void)
 	}
 }
 
+void wiringPiISRSetup() {
+	wiringPiISR(SIG1A, INT_EDGE_BOTH, pin1A_changed);
+	wiringPiISR(SIG1B, INT_EDGE_BOTH, pin1B_changed);
+	wiringPiISR(SIG2A, INT_EDGE_BOTH, pin2A_changed);
+	wiringPiISR(SIG2B, INT_EDGE_BOTH, pin2B_changed);
+	wiringPiISR(SIG3A, INT_EDGE_BOTH, pin3A_changed);
+	wiringPiISR(SIG3B, INT_EDGE_BOTH, pin3B_changed);
+}
+
 
 Omni::Omni()
 {
+	// movecmd initialize
+	movecmd[0] = 0.0;
+	movecmd[1] = 0.0;
+	movecmd[2] = 0.0;
+
 	// p,i,d gain initialize
 	gain[0] = 0.008;   // p gain
-	gain[1] = 0.001;   // i gain
-	gain[2] = 0.010;   // d gain
+	gain[1] = 0.002;   // i gain
+	gain[2] = 0.013;   // d gain
 
 	// translation rotation ratio initialize
-	ratio[0] = 0.7;    // move
-	ratio[1] = 0.3;    // rotate
-
-	//func = pin1A_changed;
-	//pin_changed[1] = pin1B_changed;
-	//pin_changed[2] = pin2A_changed;
-	//pin_changed[3] = pin2B_changed;
-	//pin_changed[4] = pin3A_changed;
-	//pin_changed[5] = pin3B_changed;
+	ratio[0] = 0.8;    // move
+	ratio[1] = 0.2;    // rotate
 }
 
 void Omni::GpioInit(void)
@@ -124,15 +131,18 @@ void Omni::pinModeInputSetup(void)
 	pinMode(SIG3B, INPUT);
 }
 
-//void Omni::wiringPiISRSetup(void)
-//{
-//	wiringPiISR(SIG1A, INT_EDGE_BOTH, &Omni::pin1A_changed());
-//	wiringPiISR(SIG1B, INT_EDGE_BOTH, &Omni::pin1B_changed());
-//	wiringPiISR(SIG2A, INT_EDGE_BOTH, &Omni::pin2A_changed());
-//	wiringPiISR(SIG2B, INT_EDGE_BOTH, &Omni::pin2B_changed());
-//	wiringPiISR(SIG3A, INT_EDGE_BOTH, &Omni::pin3A_changed());
-//	wiringPiISR(SIG3B, INT_EDGE_BOTH, &Omni::pin3B_changed());
-//}
+void Omni::set_PID_Gain(double p, double i, double d)
+{
+	gain[0] = p;
+	gain[1] = i;
+	gain[2] = d;
+}
+
+void Omni::set_ratio(double motion, double rotate)
+{
+	ratio[0] = motion;
+	ratio[1] = rotate;
+}
 
 void Omni::movecmd_write(double x, double y, double t)
 {
@@ -154,8 +164,8 @@ void Omni::calc_targetpulse()
 		movecmd[1] /= norm;
 	}
 	for(int i=0; i<3; i++) {
-		double pulseMove = ratio[0] * (movecmd[0]*cos(wrad[i]) + movecmd[1]*sin(wrad[i]));
-		double pulseRotate = -ratio[1] * movecmd[2];
+		double pulseMove = ratio[0]/(ratio[0]+ratio[1]) * (movecmd[0]*sin(wrad[i]) + movecmd[1]*cos(wrad[i]));
+		double pulseRotate = -ratio[1]/(ratio[0]+ratio[1]) * movecmd[2];
 		targetpulse[i] = MAXPULSE * (pulseMove + pulseRotate);
 	}
 }

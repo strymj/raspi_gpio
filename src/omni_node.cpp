@@ -25,21 +25,15 @@ int main(int argc, char** argv)
 	std::string cmd_topic_;
 	node_.param("looprate", looprate_, 30);
 	node_.param("emstop_time", emstop_time_, 0.5);
-	node_.param("cmd_topic", cmd_topic_,std::string("/omni_movecmd"));
+	node_.param("cmd_topic", cmd_topic_,std::string("/position_correction/movecmd"));
 	ros::Subscriber MovecmdSub = node_.subscribe(cmd_topic_, 1, movecmdCallback);
 	ros::Rate looprate(looprate_);
 
 	omni.GpioInit();
 	omni.PwmCreateSetup();
 	omni.pinModeInputSetup();
-	//omni.wiringPiISRSetup();
-	wiringPiISR(SIG1A, INT_EDGE_BOTH, pin1A_changed);
-	wiringPiISR(SIG1B, INT_EDGE_BOTH, pin1B_changed);
-	wiringPiISR(SIG2A, INT_EDGE_BOTH, pin2A_changed);
-	wiringPiISR(SIG2B, INT_EDGE_BOTH, pin2B_changed);
-	wiringPiISR(SIG3A, INT_EDGE_BOTH, pin3A_changed);
-	wiringPiISR(SIG3B, INT_EDGE_BOTH, pin3B_changed);
-
+	wiringPiISRSetup();
+	
 	while(ros::ok())
 	{
 		if(movecmdflag) { 
@@ -49,7 +43,7 @@ int main(int argc, char** argv)
 		else {
 			omni.stop();
 		}
-		omni.dispstatus();
+		//omni.dispstatus();
 		omni.pulseReset();
 		movecmdflag = false;
 		ros::spinOnce();

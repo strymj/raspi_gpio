@@ -18,41 +18,66 @@
 #define MOTOR3A 17
 #define MOTOR3B 27
 
-// OMRON E6A2-CW3C ENCODER INPUT
-#define SIG1A 6     // OUT B
-#define SIG1B 13    // OUT A
-//#define SIG1A 10     // OUT B
-//#define SIG1B 9    // OUT A
+// OMRON E6A2-CW3C Encoder INPUT PIN
+//#define SIG1A 6
+//#define SIG1B 13
+#define SIG1A 10     // OUT B
+#define SIG1B 9      // OUT A
 #define SIG2A 19
 #define SIG2B 26
 #define SIG3A 20
 #define SIG3B 21
 
-static double MAXPULSE = 3000.0 / 30;   // 3000[pulse/s] / 30[/s]
-static double wrad[3] = {0, M_PI*2/3, M_PI*4/3};   // 0, 120, 240 [deg]
+const double MAXPULSE = 3000.0 / 30;   // 3000[pulse/s] / 30[/s]
+const double wrad[3] = {0, M_PI*2/3, M_PI*4/3};   // 0, 120, 240 [deg]
 int pulse[3];
 
+// interrupt function (encorder)
 void pin1A_changed();
 void pin1B_changed();
 void pin2A_changed();
 void pin2B_changed();
 void pin3A_changed();
 void pin3B_changed();
+// interrupt function setup
+void wiringPiISRSetup();
 
 class Omni{
 	public:
 		Omni();
+		
+		// GPIO initialize
 		void GpioInit();
+		
+		// define PWM output pin (motor)
 		void PwmCreateSetup();
-		//void wiringPiISRSetup();
+		
+		// define input pin (encoder)
 		void pinModeInputSetup();
+
+		// set P,I,D Gain
+		void set_PID_Gain(double,double,double);
+
+		// set ratio (motion:rotation)
+		void set_ratio(double,double);
+		
+		// write omni-directional vehicle motion (x,y,rotation)
+		//     x
+		//     ^   rotation>0 : counterclockwise
+		//  y< Δ   rotation<0 : clockwise
 		void movecmd_write(double,double,double);
+		
+		// output pwm (determined by PID control)
 		void output();
+
+		// motor stop
 		void stop();
+
+		// show status (move command, now pulse, target pulse, PWM ratio)
 		void dispstatus();
+
+		// encorder pulse reset
 		void pulseReset();
-		void pulse_incre(int);
-		void pulse_decre(int);
 	private:
 		double movecmd[3];
 		int targetpulse[3];
