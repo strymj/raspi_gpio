@@ -32,7 +32,7 @@ int main(int argc, char** argv)
 	omni.GpioInit();
 	omni.PwmCreateSetup();
 	omni.pinModeInputSetup();
-	wiringPiISRSetup();
+	omni.wiringPiISRSetup();
 	
 	while(ros::ok())
 	{

@@ -39,8 +39,6 @@ void pin2A_changed();
 void pin2B_changed();
 void pin3A_changed();
 void pin3B_changed();
-// interrupt function setup
-void wiringPiISRSetup();
 
 class Omni{
 	public:
@@ -54,6 +52,11 @@ class Omni{
 		
 		// define input pin (encoder)
 		void pinModeInputSetup();
+
+		void wiringPiISRSetup();
+
+		// set control period [/s]
+		void set_control_Hz(double);
 
 		// set P,I,D Gain
 		void set_PID_Gain(double,double,double);
@@ -78,12 +81,15 @@ class Omni{
 
 		// encorder pulse reset
 		void pulseReset();
+
 	private:
 		double movecmd[3];
 		int targetpulse[3];
 		double motorout[3];
 		double gain[3];   // p, i, d gain
 		double ratio[2];    // ratio move : rotate
+		int pulse_per_rotate;
+		double control_Hz;
 		void calc_targetpulse();
 		void calc_motorout();
 		void PWMwrite();

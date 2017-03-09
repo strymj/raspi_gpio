@@ -73,27 +73,21 @@ void pin3B_changed(void)
 	}
 }
 
-void wiringPiISRSetup() {
-	wiringPiISR(SIG1A, INT_EDGE_BOTH, pin1A_changed);
-	wiringPiISR(SIG1B, INT_EDGE_BOTH, pin1B_changed);
-	wiringPiISR(SIG2A, INT_EDGE_BOTH, pin2A_changed);
-	wiringPiISR(SIG2B, INT_EDGE_BOTH, pin2B_changed);
-	wiringPiISR(SIG3A, INT_EDGE_BOTH, pin3A_changed);
-	wiringPiISR(SIG3B, INT_EDGE_BOTH, pin3B_changed);
-}
-
 
 Omni::Omni()
 {
+	pulse_per_rotate = 200;
+	control_Hz = 30.0;
+
 	// movecmd initialize
 	movecmd[0] = 0.0;
 	movecmd[1] = 0.0;
 	movecmd[2] = 0.0;
 
 	// p,i,d gain initialize
-	gain[0] = 0.008;   // p gain
-	gain[1] = 0.002;   // i gain
-	gain[2] = 0.013;   // d gain
+	gain[0] = 0.03;   // p gain
+	gain[1] = 0.007;   // i gain
+	gain[2] = 0.045;   // d gain
 
 	// translation rotation ratio initialize
 	ratio[0] = 0.8;    // move
@@ -131,17 +125,47 @@ void Omni::pinModeInputSetup(void)
 	pinMode(SIG3B, INPUT);
 }
 
+void Omni::wiringPiISRSetup()
+{
+	wiringPiISR(SIG1A, INT_EDGE_BOTH, pin1A_changed);
+	wiringPiISR(SIG1B, INT_EDGE_BOTH, pin1B_changed);
+	wiringPiISR(SIG2A, INT_EDGE_BOTH, pin2A_changed);
+	wiringPiISR(SIG2B, INT_EDGE_BOTH, pin2B_changed);
+	wiringPiISR(SIG3A, INT_EDGE_BOTH, pin3A_changed);
+	wiringPiISR(SIG3B, INT_EDGE_BOTH, pin3B_changed);
+}
+
+void Omni::set_control_Hz(double value)
+{
+	if(value<0) {
+		cout<<"cannnot set control Hz. (>0)"<<endl;
+	}
+	else {
+		control_Hz = value;
+	}
+}
+
 void Omni::set_PID_Gain(double p, double i, double d)
 {
-	gain[0] = p;
-	gain[1] = i;
-	gain[2] = d;
+	if(p<0 || i<0 || d<0) {
+		cout<<"cannot set PID gain. (>0)"<<endl;
+	}
+	else {
+		gain[0] = p;
+		gain[1] = i;
+		gain[2] = d;
+	}
 }
 
 void Omni::set_ratio(double motion, double rotate)
 {
-	ratio[0] = motion;
-	ratio[1] = rotate;
+	if(motion<0 || rotate<0) {
+		cout<<"cannot set ratio. (motion, rotate >0)"<<endl;
+	}
+	else {
+		ratio[0] = motion;
+		ratio[1] = rotate;
+	}
 }
 
 void Omni::movecmd_write(double x, double y, double t)
@@ -176,13 +200,14 @@ void Omni::calc_motorout()
 	static int Diff[3] = {0,0,0};
 	static int PastDiff[3] = {0,0,0};
 	static int Dist[3] = {0,0,0};
+	static double pulse2rotate = control_Hz / pulse_per_rotate;
 	for(int i=0; i<NOW; i++) {
 		Diff[i] = pulse[i] - targetpulse[i];
 		Dist[i] += Diff[i];
 		motorout[i] =
-			- gain[0] * (pulse[i]-targetpulse[i])
-			- gain[1] * Dist[i]
-			- gain[2] * (Diff[i] - PastDiff[i]);
+			- gain[0] * pulse2rotate * (pulse[i]-targetpulse[i]);
+			- gain[1] * pulse2rotate * Dist[i]
+			- gain[2] * pulse2rotate * (Diff[i] - PastDiff[i]);
 		PastDiff[i] = Diff[i]; 
 		if(motorout[i]>1) motorout[i] = 1;
 		else if(motorout[i]<-1) motorout[i] = -1;
