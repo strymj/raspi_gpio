@@ -25,7 +25,7 @@ int main(int argc, char** argv)
 	std::string cmd_topic_;
 	node_.param("looprate", looprate_, 30);
 	node_.param("emstop_time", emstop_time_, 0.5);
-	node_.param("cmd_topic", cmd_topic_,std::string("/position_correction/movecmd"));
+	node_.param("cmd_topic", cmd_topic_,std::string("/omni_movecmd"));
 	ros::Subscriber MovecmdSub = node_.subscribe(cmd_topic_, 1, movecmdCallback);
 	ros::Rate looprate(looprate_);
 
@@ -43,7 +43,7 @@ int main(int argc, char** argv)
 		else {
 			omni.stop();
 		}
-		//omni.dispstatus();
+		omni.dispstatus();
 		omni.pulseReset();
 		movecmdflag = false;
 		ros::spinOnce();

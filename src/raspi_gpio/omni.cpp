@@ -85,13 +85,13 @@ Omni::Omni()
 	movecmd[2] = 0.0;
 
 	// p,i,d gain initialize
-	gain[0] = 0.03;   // p gain
-	gain[1] = 0.007;   // i gain
-	gain[2] = 0.045;   // d gain
+	gain[0] = 0.15;    // p gain
+	gain[1] = 0.020;   // i gain
+	gain[2] = 0.12;   // d gain
 
 	// translation rotation ratio initialize
-	ratio[0] = 0.8;    // move
-	ratio[1] = 0.2;    // rotate
+	ratio[0] = 0.7;    // move
+	ratio[1] = 0.3;    // rotate
 }
 
 void Omni::GpioInit(void)
@@ -188,7 +188,7 @@ void Omni::calc_targetpulse()
 		movecmd[1] /= norm;
 	}
 	for(int i=0; i<3; i++) {
-		double pulseMove = ratio[0]/(ratio[0]+ratio[1]) * (movecmd[0]*sin(wrad[i]) + movecmd[1]*cos(wrad[i]));
+		double pulseMove = ratio[0]/(ratio[0]+ratio[1]) * (movecmd[0]*sin(wrad[i]) + movecmd[1]*-cos(wrad[i]));
 		double pulseRotate = -ratio[1]/(ratio[0]+ratio[1]) * movecmd[2];
 		targetpulse[i] = MAXPULSE * (pulseMove + pulseRotate);
 	}
